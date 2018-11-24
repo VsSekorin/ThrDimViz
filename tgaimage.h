@@ -74,6 +74,11 @@ private:
     int width;
     int height;
     int bytespp;
+
+    bool load_rle_data(std::ifstream &in);
+    bool unload_rle_data(std::ofstream &out);
+    bool flip_horizontally();
+
 public:
     enum Format { //WTF? Who steal 2? Just tell me... Heh, magic numbers :)
         GRAYSCALE = 1, RGB = 3, RGBA = 4
@@ -86,7 +91,8 @@ public:
     TGAColor get(int x, int y);
     bool set(int x, int y, TGAColor color);
     bool flip_vertically();
-    bool save(const char *filename, bool rle=true);
+    bool read(const char *filename);
+    bool write(const char *filename, bool rle = true);
 
     ~TGAImage();
 };
