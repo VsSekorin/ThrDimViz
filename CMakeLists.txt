@@ -3,4 +3,4 @@ project(ThrDimViz)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(ThrDimViz main.cpp)
+add_executable(ThrDimViz main.cpp tgaimage.h tgaimage.cpp)
