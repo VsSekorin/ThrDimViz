@@ -1,6 +1,11 @@
 #include <iostream>
+#include "tgaimage.h"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    const auto size = 1000;
+    TGAImage image(size, size, TGAImage::RGB);
+//    image.draw();
+    image.flip_vertically();
+    image.save("out.tga");
     return 0;
 }
