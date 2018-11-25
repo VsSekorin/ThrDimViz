@@ -6,14 +6,12 @@
 #include "tgaimage.h"
 
 TGAImage::TGAImage() : data(NULL), width(0), height(0), bytespp(0) {
-    //standard useless constructor. Or not? I wanna delete this.
-    //And NULL. [BibleThump]
 }
 
 TGAImage::TGAImage(int width, int height, int bpp) : data(NULL), width(width), height(height), bytespp(bpp) {
     const auto nbytes = static_cast<unsigned long>(this->width * this->height * this->bytespp);
     this->data = new unsigned char[nbytes];
-    memcpy(this->data, 0, nbytes); //Clion think that I should use nullptr instead of 0.
+    memcpy(this->data, 0, nbytes);
 }
 
 TGAImage::TGAImage(const TGAImage &image) : data(NULL), width(image.width), height(image.height),
@@ -24,7 +22,7 @@ TGAImage::TGAImage(const TGAImage &image) : data(NULL), width(image.width), heig
 }
 
 TGAImage::~TGAImage() {
-    if (this->data) delete[] data; //Clion suggest me remove `if`, just `delete[] data`.
+    if (this->data) delete[] data;
 }
 
 TGAColor TGAImage::get(int x, int y) {
