@@ -3,7 +3,6 @@
 
 #include <fstream>
 
-// What is it? I don't know. Deal with it.
 #pragma pack(push, 1)
 struct TGA_Header {
     char idlength;
@@ -22,7 +21,7 @@ struct TGA_Header {
 #pragma pack(pop)
 
 struct TGAColor {
-    unsigned char bgra[4]; //Not argb???
+    unsigned char bgra[4];
     unsigned char bytespp;
 
     TGAColor() : bgra(), bytespp(1) {
@@ -80,12 +79,12 @@ private:
     bool flip_horizontally();
 
 public:
-    enum Format { //WTF? Who steal 2? Just tell me... Heh, magic numbers :)
+    enum Format {
         GRAYSCALE = 1, RGB = 3, RGBA = 4
     };
 
     TGAImage();
-    TGAImage(int width, int height, int bpp); //bpp? What does it mean? Body Positive Player?
+    TGAImage(int width, int height, int bpp);
     TGAImage(const TGAImage &image);
 
     TGAColor get(int x, int y);

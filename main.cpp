@@ -6,6 +6,6 @@ int main() {
     TGAImage image(size, size, TGAImage::RGB);
 //    image.draw();
     image.flip_vertically();
-    image.save("out.tga");
+    image.write("out.tga");
     return 0;
 }
