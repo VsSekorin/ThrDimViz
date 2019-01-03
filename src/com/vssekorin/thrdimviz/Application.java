@@ -1,38 +1,26 @@
 package com.vssekorin.thrdimviz;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import static com.vssekorin.thrdimviz.Param.*;
-
 public final class Application {
 
     public static final Obj model = loadObj();
 
     public static void main(String[] args) {
-        normalize(ligthDir);
-        renderShadow();
-        float[][] M = mxMul(mxViewport, mxProjection, mxModelView);
-        renderImage();
-    }
-
-    private static float[][] mxMul(float[][] first, float[][] second, float[][] third) {
-        return mxMul2(mxMul2(first, second), third);
-    }
-
-    private static float[][] mxMul2(float[][] first, float[][] second) {
-        final float[][] result = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                for (int k = 0; k < 4; k++) {
-                    result[i][j] += first[i][k] + second[k][j];
-                }
-            }
+        for (int i = 0; i < size * size; i++) {
+            bufferZ[i] = 0;
+            bufferShadow[i] = 0;
         }
-        return result;
+        Vector.normalize(ligthDir);
+        renderShadow();
+        renderImage();
     }
 
     private static void renderShadow() {
@@ -41,22 +29,28 @@ public final class Application {
         viewport(size / 8, size / 8, size * 3 / 4, size * 3 / 4);
         projection(0);
         Shader second = new SecondShader();
-        float[][] coords = new float[3][3];
+        float[][] coords = new float[3][4];
         for (int i = 0; i < model.f.size(); i++) {
             coords[0] = second.vertex(i, 0);
             coords[1] = second.vertex(i, 1);
             coords[2] = second.vertex(i, 2);
             triangle(coords, second, sorry, bufferShadow);
         }
+        flipVertically(sorry);
+        try {
+            ImageIO.write(sorry, "jpeg", new File("sorry.jpeg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void projection(float coef) {
-        identity(mxProjection);
+        Matrix.identity(mxProjection);
         mxProjection[3][2] = coef;
     }
 
     private static void viewport(int x, int y, int w, int h) {
-        identity(mxViewport);
+        Matrix.identity(mxViewport);
         mxViewport[0][3] = x + w / 2.f;
         mxViewport[1][3] = y + h / 2.f;
         mxViewport[2][3] = depth / 2.f;
@@ -66,10 +60,10 @@ public final class Application {
     }
 
     private static void lookat(float[] eye, float[] center, float[] up) {
-        final float[] z = normalize(Vector.sub(eye, center));
-        final float[] x = normalize(cross(up, z));
-        final float[] y = normalize(cross(z, x));
-        identity(mxModelView);
+        final float[] z = Vector.normalize(Vector.sub(eye, center));
+        final float[] x = Vector.normalize(cross(up, z));
+        final float[] y = Vector.normalize(cross(z, x));
+        Matrix.identity(mxModelView);
         for (int i = 0; i < 3; i++) {
             mxModelView[0][i] = x[i];
             mxModelView[1][i] = y[i];
@@ -86,36 +80,37 @@ public final class Application {
         };
     }
 
-    private static void identity(float[][] mx) {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                mx[i][j] = i == j ? 1 : 0;
-            }
-        }
-    }
-
     private static void renderImage() {
+        float[][] M = Matrix.mul3(mxViewport, mxProjection, mxModelView);
         final BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         lookat(eye, center, up);
         viewport(size / 8, size / 8, size * 3 / 4, size * 3 / 4);
-        projection(-1.f / norma(Vector.sub(eye, center)));
-        Shader first = new Shader() {//TODO
-            @Override
-            public float[] vertex(int a, int b) {
-                return new float[0];
-            }
-
-            @Override
-            public Object[] fragment(float[] a, int b) {
-                return new Object[2];
-            }
-        };
-        float[][] coords = new float[3][3];
+        projection(-1.f / Vector.norma(Vector.sub(eye, center)));
+        float[][] mit = Matrix.transpose(Matrix.inverse(Matrix.multiply(mxProjection, mxModelView)));
+        float[][] mshadow = Matrix.multiply(M, Matrix.inverse(Matrix.mul3(mxViewport, mxProjection, mxModelView)));
+        final Shader shader = new FirstShader(mxModelView, mit, mshadow);
+        float[][] coords = new float[3][4];
         for (int i = 0; i < model.f.size(); i++) {
-            coords[0] = first.vertex(i, 0);
-            coords[1] = first.vertex(i, 1);
-            coords[2] = first.vertex(i, 2);
-            triangle(coords, first, image, bufferZ);
+            coords[0] = shader.vertex(i, 0);
+            coords[1] = shader.vertex(i, 1);
+            coords[2] = shader.vertex(i, 2);
+            triangle(coords, shader, image, bufferZ);
+        }
+        flipVertically(image);
+        try {
+            ImageIO.write(image, "jpeg", new File("image.jpeg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void flipVertically(final BufferedImage image) {
+        for (int i = 1; i < size; i++) {
+            for (int j = 1; j < size / 2; j++) {
+                int rgb = image.getRGB(i, j);
+                image.setRGB(i, j, image.getRGB(i, size - j));
+                image.setRGB(i, size - j, rgb);
+            }
         }
     }
 
@@ -128,7 +123,7 @@ public final class Application {
                 max[j] = Math.max(max[j], coords[i][j] / coords[i][3]);
             }
         }
-        Integer color = 0;
+        int color = 0;
         for (float x = min[0]; x < max[0]; x++) {
             for (float y = min[1]; y < max[1]; y++) {
                 final float[] c = barycentric(
@@ -140,12 +135,16 @@ public final class Application {
                 final float z = coords[0][2] * c[0] + coords[1][2] * c[1] + coords[2][2] * c[2];
                 final float w = coords[0][3] * c[0] + coords[1][3] * c[1] + coords[2][3] * c[2];
                 final int fd = (int) (z / w);
-                if (c[0] < 0 || c[1] < 0 || c[2] < 0 || buffer[(int) (x + y * size)] > fd)
+                if (x < 0 || y < 0) {
                     continue;
+                }
+                if (c[0] < 0 || c[1] < 0 || c[2] < 0 || buffer[(int) (x + y * size)] > fd) {
+                    continue;
+                }
                 Object[] discardAndColor = shader.fragment(c, color);
                 if (!(boolean) discardAndColor[0]) {
                     buffer[(int) (x + y * size)] = fd;
-                    image.setRGB((int) x, (int) y, (int) discardAndColor[1]);
+                    image.setRGB((int) x, (int) y, ((Float) discardAndColor[1]).intValue());
                 }
             }
         }
@@ -164,18 +163,6 @@ public final class Application {
         } else {
             return new float[]{-1, -1, -1};
         }
-    }
-
-    private static float[] normalize(float[] vector) {
-        final float norma = norma(vector);
-        vector[0] *= 1 / norma;
-        vector[1] *= 1 / norma;
-        vector[2] *= 1 / norma;
-        return vector;
-    }
-
-    private static float norma(float[] vector) {
-        return vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2];
     }
 
     private static Obj loadObj() {
