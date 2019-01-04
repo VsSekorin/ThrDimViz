@@ -6,15 +6,18 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static com.vssekorin.thrdimviz.Param.*;
 public final class Application {
 
-    public static final Obj model = loadObj();
+    public static Obj model;
 
-    public static void main(String[] args) {
+    public static BufferedImage texture;
+
+    public static void main(String[] args) throws IOException {
+        model = loadObj();
+        texture = ImageIO.read(new File("texture.jpg"));
         for (int i = 0; i < size * size; i++) {
             bufferZ[i] = 0;
             bufferShadow[i] = 0;
@@ -140,7 +143,7 @@ public final class Application {
                     continue;
                 }
                 Object[] discardAndColor = shader.fragment(c, color);
-                if (!(boolean) discardAndColor[0]) {
+                if (!(boolean) discardAndColor[0] && x < 1000 && y < 1000 && x > 0 && y > 0) {
                     buffer[(int) (x + y * size)] = fd;
                     image.setRGB((int) x, (int) y, (int)discardAndColor[1]);
                 }

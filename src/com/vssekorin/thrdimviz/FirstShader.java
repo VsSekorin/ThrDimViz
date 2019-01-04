@@ -34,6 +34,28 @@ public final class FirstShader implements Shader {
 
     @Override
     public Object[] fragment(final float[] a, final int b) {
-        return new Object[]{true, 0x00ff00};
+        Object[] result = new Object[2];
+        result[0] = false;
+        float[] sbp = Matrix.mulVect(Mshadow, Vector.upLength(Matrix.mulVect(tri, a), 4, 1));
+        sbp = Vector.div(sbp, sbp[3]);
+        int idx = (int)(sbp[0] + 0.5f) + (int) (sbp[1] + 0.5f) * size;
+        float shadow = 0.3f + 0.7f * (bufferShadow[idx] < sbp[2] ? 1 : 0);
+        float[] vUV = Matrix.mulVect(uv, a);
+        int rgb = Application.texture.getRGB((int) (vUV[0] * 2844), (int) (vUV[1] * 2844));
+        int[] components = getComponents(rgb);
+        result[1] = toColor((int)(components[0] * shadow), (int)(components[1] * shadow), (int)(components[2] * shadow));
+        return result;
+    }
+
+    private int[] getComponents(int color) {
+        int[] components = new int[3];
+        components[2] = color % 256;
+        components[1] = (color / 256) % 256;
+        components[0] = (color /256 / 256) % 256;
+        return components;
+    }
+
+    private int toColor(int r, int g, int b) {
+        return 256 * 256 * r + 256 * g + b;
     }
 }
