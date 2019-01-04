@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static com.vssekorin.thrdimviz.Param.*;
@@ -116,7 +117,7 @@ public final class Application {
 
     private static void triangle(float[][] coords, Shader shader, BufferedImage image, float[] buffer) {
         final float[] min = new float[]{Float.MAX_VALUE, Float.MAX_VALUE};
-        final float[] max = new float[]{Float.MIN_VALUE, Float.MIN_VALUE};
+        final float[] max = new float[]{-Float.MAX_VALUE, -Float.MAX_VALUE};
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 2; j++) {
                 min[j] = Math.min(min[j], coords[i][j] / coords[i][3]);
@@ -135,9 +136,6 @@ public final class Application {
                 final float z = coords[0][2] * c[0] + coords[1][2] * c[1] + coords[2][2] * c[2];
                 final float w = coords[0][3] * c[0] + coords[1][3] * c[1] + coords[2][3] * c[2];
                 final int fd = (int) (z / w);
-                if (x < 0 || y < 0) {
-                    continue;
-                }
                 if (c[0] < 0 || c[1] < 0 || c[2] < 0 || buffer[(int) (x + y * size)] > fd) {
                     continue;
                 }
