@@ -20,8 +20,16 @@ public final class SecondShader implements Shader {
     @Override
     public Object[] fragment(float[] a, int b) {
         final Object[] result = new Object[2];
+        float[] vect = Matrix.mulVect(tr, a);
+        float v = vect[2] / depth;
+        float intensity = (v > 1.f ? 1.f : (v < 0.f ? 0.f : v));
         result[0] = false;
-        result[1] = a[0] * tr[2][0] + a[1] * tr[2][1] + a[2] * tr[2][2];
+        int component = (int)(255 * intensity);
+        result[1] = toColor(component, component, component);
         return result;
+    }
+
+    private int toColor(int r, int g, int b) {
+        return 256 * 256 * r + 256 * g + b;
     }
 }

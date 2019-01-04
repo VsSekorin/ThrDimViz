@@ -144,7 +144,7 @@ public final class Application {
                 Object[] discardAndColor = shader.fragment(c, color);
                 if (!(boolean) discardAndColor[0]) {
                     buffer[(int) (x + y * size)] = fd;
-                    image.setRGB((int) x, (int) y, ((Float) discardAndColor[1]).intValue());
+                    image.setRGB((int) x, (int) y, (int)discardAndColor[1]);
                 }
             }
         }
