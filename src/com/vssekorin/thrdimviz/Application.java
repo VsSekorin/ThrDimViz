@@ -73,14 +73,6 @@ public final class Application {
         }
     }
 
-    private static float[] cross(float[] first, float[] second) {
-        return new float[]{
-            first[1] * second[2] - first[2] * second[1],
-            first[2] * second[0] - first[0] * second[2],
-            first[0] * second[1] - first[1] * second[0]
-        };
-    }
-
     private static void renderImage() throws IOException {
         float[][] M = mult(mxViewport, mxProjection, mxModelView);
         final BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
