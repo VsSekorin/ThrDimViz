@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
+import static com.vssekorin.thrdimviz.Geometry.*;
 import static com.vssekorin.thrdimviz.Param.*;
 public final class Application {
 
@@ -22,7 +23,7 @@ public final class Application {
             bufferZ[i] = -Float.MAX_VALUE;
             bufferShadow[i] = -Float.MAX_VALUE;
         }
-        Vector.normalize(ligthDir);
+        normalize(ligthDir);
         renderShadow();
         renderImage();
     }
@@ -45,12 +46,12 @@ public final class Application {
     }
 
     private static void projection(float coef) {
-        Matrix.identity(mxProjection);
+        identity(mxProjection);
         mxProjection[3][2] = coef;
     }
 
     private static void viewport(int x, int y, int w, int h) {
-        Matrix.identity(mxViewport);
+        identity(mxViewport);
         mxViewport[0][3] = x + w / 2.f;
         mxViewport[1][3] = y + h / 2.f;
         mxViewport[2][3] = depth / 2.f;
@@ -60,10 +61,10 @@ public final class Application {
     }
 
     private static void lookat(float[] eye, float[] center, float[] up) {
-        final float[] z = Vector.normalize(Vector.sub(eye, center));
-        final float[] x = Vector.normalize(cross(up, z));
-        final float[] y = Vector.normalize(cross(z, x));
-        Matrix.identity(mxModelView);
+        final float[] z = normalize(sub(eye, center));
+        final float[] x = normalize(cross(up, z));
+        final float[] y = normalize(cross(z, x));
+        identity(mxModelView);
         for (int i = 0; i < 3; i++) {
             mxModelView[0][i] = x[i];
             mxModelView[1][i] = y[i];
@@ -81,13 +82,13 @@ public final class Application {
     }
 
     private static void renderImage() throws IOException {
-        float[][] M = Matrix.mul3(mxViewport, mxProjection, mxModelView);
+        float[][] M = mult(mxViewport, mxProjection, mxModelView);
         final BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         lookat(eye, center, up);
         viewport(size / 8, size / 8, size * 3 / 4, size * 3 / 4);
-        projection(-1.f / Vector.norma(Vector.sub(eye, center)));
-        float[][] mit = Matrix.transpose(Matrix.inverse(Matrix.multiply(mxProjection, mxModelView)));
-        float[][] mshadow = Matrix.multiply(M, Matrix.inverse(Matrix.mul3(mxViewport, mxProjection, mxModelView)));
+        projection(-1.f / norma(sub(eye, center)));
+        float[][] mit = transpose(inverse(Geometry.mult(mxProjection, mxModelView)));
+        float[][] mshadow = Geometry.mult(M, inverse(mult(mxViewport, mxProjection, mxModelView)));
         final Shader shader = new FirstShader(mxModelView, mit, mshadow);
         float[][] coords = new float[3][4];
         for (int i = 0; i < model.f.size(); i++) {
@@ -123,9 +124,9 @@ public final class Application {
         for (int x = (int)min[0]; x < max[0]; x++) {
             for (int y = (int)min[1]; y < max[1]; y++) {
                 final float[] c = barycentric(
-                    Vector.lowLength(Vector.div(coords[0], coords[0][3]), 2),
-                    Vector.lowLength(Vector.div(coords[1], coords[1][3]), 2),
-                    Vector.lowLength(Vector.div(coords[2], coords[2][3]), 2),
+                    lowLength(div(coords[0], coords[0][3]), 2),
+                    lowLength(div(coords[1], coords[1][3]), 2),
+                    lowLength(div(coords[2], coords[2][3]), 2),
                     new float[]{x, y}
                 );
                 final float z = coords[0][2] * c[0] + coords[1][2] * c[1] + coords[2][2] * c[2];

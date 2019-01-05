@@ -1,5 +1,6 @@
 package com.vssekorin.thrdimviz;
 
+import static com.vssekorin.thrdimviz.Geometry.*;
 import static com.vssekorin.thrdimviz.Param.*;
 
 public final class FirstShader implements Shader {
@@ -21,11 +22,11 @@ public final class FirstShader implements Shader {
         float[] uvs = Application.model.vt.get(Application.model.f.get(a)[b][1] - 1);
         uv[0][b] = uvs[0];
         uv[1][b] = uvs[1];
-        float[] gl = Matrix.mulVect(
-            Matrix.mul3(mxViewport, mxProjection, mxModelView),
-            Vector.upLength(Application.model.v.get(Application.model.f.get(a)[b][0] - 1), 4, 1)
+        float[] gl = Geometry.mult(
+            mult(mxViewport, mxProjection, mxModelView),
+            upLength(Application.model.v.get(Application.model.f.get(a)[b][0] - 1), 4, 1)
         );
-        float[] divGl = Vector.div(gl, gl[3]);
+        float[] divGl = div(gl, gl[3]);
         tri[0][b] = divGl[0];
         tri[1][b] = divGl[1];
         tri[2][b] = divGl[2];
@@ -36,11 +37,11 @@ public final class FirstShader implements Shader {
     public Object[] fragment(final float[] a, final int b) {
         Object[] result = new Object[2];
         result[0] = false;
-        float[] sbp = Matrix.mulVect(Mshadow, Vector.upLength(Matrix.mulVect(tri, a), 4, 1));
-        sbp = Vector.div(sbp, sbp[3]);
+        float[] sbp = Geometry.mult(Mshadow, upLength(Geometry.mult(tri, a), 4, 1));
+        sbp = div(sbp, sbp[3]);
         int idx = (int)(sbp[0] + 0.5f) + (int) (sbp[1] + 0.5f) * size;
         float shadow = 0.3f + 0.7f * (bufferShadow[idx] < sbp[2] + 123.45 ? 1 : 0);
-        float[] vUV = Matrix.mulVect(uv, a);
+        float[] vUV = Geometry.mult(uv, a);
         int rgb = Application.texture.getRGB((int) (vUV[0] * 2844), (int) (vUV[1] * 2844));
         int[] components = getComponents(rgb);
         result[1] = toColor((int)(components[0] * shadow), (int)(components[1] * shadow), (int)(components[2] * shadow));
