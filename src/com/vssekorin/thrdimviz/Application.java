@@ -128,8 +128,8 @@ public final class Application {
             }
         }
         int color = 0;
-        for (float x = min[0]; x < max[0]; x++) {
-            for (float y = min[1]; y < max[1]; y++) {
+        for (int x = (int)min[0]; x < max[0]; x++) {
+            for (int y = (int)min[1]; y < max[1]; y++) {
                 final float[] c = barycentric(
                     Vector.lowLength(Vector.div(coords[0], coords[0][3]), 2),
                     Vector.lowLength(Vector.div(coords[1], coords[1][3]), 2),
@@ -139,13 +139,13 @@ public final class Application {
                 final float z = coords[0][2] * c[0] + coords[1][2] * c[1] + coords[2][2] * c[2];
                 final float w = coords[0][3] * c[0] + coords[1][3] * c[1] + coords[2][3] * c[2];
                 final int fd = (int) (z / w);
-                if (c[0] < 0 || c[1] < 0 || c[2] < 0 || buffer[(int) (x + y * size)] > fd) {
+                if (c[0] < 0 || c[1] < 0 || c[2] < 0 || buffer[x + y * size] > fd) {
                     continue;
                 }
                 Object[] discardAndColor = shader.fragment(c, color);
                 if (!(boolean) discardAndColor[0] && x < 1000 && y < 1000 && x > 0 && y > 0) {
-                    buffer[(int) (x + y * size)] = fd;
-                    image.setRGB((int) x, (int) y, (int)discardAndColor[1]);
+                    buffer[x + y * size] = fd;
+                    image.setRGB(x, y, (int)discardAndColor[1]);
                 }
             }
         }
