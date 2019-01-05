@@ -39,7 +39,7 @@ public final class FirstShader implements Shader {
         float[] sbp = Matrix.mulVect(Mshadow, Vector.upLength(Matrix.mulVect(tri, a), 4, 1));
         sbp = Vector.div(sbp, sbp[3]);
         int idx = (int)(sbp[0] + 0.5f) + (int) (sbp[1] + 0.5f) * size;
-        float shadow = 0.3f + 0.7f * (bufferShadow[idx] < sbp[2] ? 1 : 0);
+        float shadow = 0.3f + 0.7f * (bufferShadow[idx] < sbp[2] + 123.45 ? 1 : 0);
         float[] vUV = Matrix.mulVect(uv, a);
         int rgb = Application.texture.getRGB((int) (vUV[0] * 2844), (int) (vUV[1] * 2844));
         int[] components = getComponents(rgb);
