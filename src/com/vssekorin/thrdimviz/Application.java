@@ -144,7 +144,7 @@ public final class Application {
             e[i][2] = a[i] - d[i];
         }
         float[] f = cross(e[0], e[1]);
-        if (f[2] > 0.0001) {
+        if (Math.abs(f[2]) > 0.0001) {
             return new float[]{1.f - (f[0] + f[1]) / f[2], f[1] / f[2], f[0] / f[2]};
         } else {
             return new float[]{-1, -1, -1};
