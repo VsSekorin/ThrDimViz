@@ -19,15 +19,15 @@ public final class Application {
         model = loadObj();
         texture = ImageIO.read(new File("texture.jpg"));
         for (int i = 0; i < size * size; i++) {
-            bufferZ[i] = 0;
-            bufferShadow[i] = 0;
+            bufferZ[i] = -Float.MAX_VALUE;
+            bufferShadow[i] = -Float.MAX_VALUE;
         }
         Vector.normalize(ligthDir);
         renderShadow();
         renderImage();
     }
 
-    private static void renderShadow() {
+    private static void renderShadow() throws IOException {
         final BufferedImage sorry = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         lookat(ligthDir, center, up);
         viewport(size / 8, size / 8, size * 3 / 4, size * 3 / 4);
@@ -41,11 +41,7 @@ public final class Application {
             triangle(coords, second, sorry, bufferShadow);
         }
         flipVertically(sorry);
-        try {
-            ImageIO.write(sorry, "jpeg", new File("sorry.jpeg"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ImageIO.write(sorry, "jpeg", new File("sorry.jpeg"));
     }
 
     private static void projection(float coef) {
@@ -84,7 +80,7 @@ public final class Application {
         };
     }
 
-    private static void renderImage() {
+    private static void renderImage() throws IOException {
         float[][] M = Matrix.mul3(mxViewport, mxProjection, mxModelView);
         final BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         lookat(eye, center, up);
@@ -101,11 +97,7 @@ public final class Application {
             triangle(coords, shader, image, bufferZ);
         }
         flipVertically(image);
-        try {
-            ImageIO.write(image, "jpeg", new File("image.jpeg"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ImageIO.write(image, "jpeg", new File("image.jpeg"));
     }
 
     private static void flipVertically(final BufferedImage image) {
