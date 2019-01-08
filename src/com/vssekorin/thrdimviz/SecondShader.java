@@ -31,6 +31,6 @@ public final class SecondShader implements Shader {
     }
 
     private int toColor(int r, int g, int b) {
-        return 256 * 256 * r + 256 * g + b;
+        return 255 << 24 | (r & 255) << 16 | (g & 255) << 8 | (b & 255);
     }
 }

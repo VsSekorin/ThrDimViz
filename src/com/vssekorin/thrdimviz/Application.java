@@ -10,15 +10,19 @@ import java.util.stream.Stream;
 
 import static com.vssekorin.thrdimviz.Geometry.*;
 import static com.vssekorin.thrdimviz.Param.*;
+
 public final class Application {
 
     public static Obj model;
 
     public static BufferedImage texture;
 
+    public static BufferedImage normals;
+
     public static void main(String[] args) throws IOException {
         model = loadObj();
         texture = ImageIO.read(new File("texture.jpg"));
+        normals = ImageIO.read(new File("normals.jpg"));
         for (int i = 0; i < size * size; i++) {
             bufferZ[i] = -Float.MAX_VALUE;
             bufferShadow[i] = -Float.MAX_VALUE;
@@ -79,8 +83,8 @@ public final class Application {
         lookat(eye, center, up);
         viewport(size / 8, size / 8, size * 3 / 4, size * 3 / 4);
         projection(-1.f / norma(sub(eye, center)));
-        float[][] mit = transpose(inverse(Geometry.mult(mxProjection, mxModelView)));
-        float[][] mshadow = Geometry.mult(M, inverse(mult(mxViewport, mxProjection, mxModelView)));
+        float[][] mit = transpose(inverse(mult(mxProjection, mxModelView)));// or inverse(transpose(...))
+        float[][] mshadow = mult(M, inverse(mult(mxViewport, mxProjection, mxModelView)));
         final Shader shader = new FirstShader(mxModelView, mit, mshadow);
         float[][] coords = new float[3][4];
         for (int i = 0; i < model.f.size(); i++) {

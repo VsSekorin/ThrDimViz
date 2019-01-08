@@ -1,5 +1,7 @@
 package com.vssekorin.thrdimviz;
 
+import java.util.Arrays;
+
 import static com.vssekorin.thrdimviz.Geometry.*;
 import static com.vssekorin.thrdimviz.Param.*;
 
@@ -34,29 +36,39 @@ public final class FirstShader implements Shader {
     }
 
     @Override
-    public Object[] fragment(final float[] a, final int b) {
+    public Object[] fragment(float[] a, int b) {
         Object[] result = new Object[2];
+        float[] vUV = mult(uv, a);
+        float[] n = normalize(lowLength(mult(Mit, upLength(getNormal(vUV), 4, 1)), 3));
+        float[] l = normalize(lowLength(mult(M, upLength(ligthDir, 4, 1)), 3));
+        float[] r = normalize(sub(mult(n, dot(n, l) * 2.0f), l));
+        float rz = Math.max(r[2], 0.0f);
+        float d = Math.max(dot(n, l), 0.0f);
+        int[] color = getComponents(Application.texture.getRGB((int) (vUV[0] * 2844), (int) (vUV[1] * 2844)));
+        for (int i = 0; i < 3; i++) {
+            color[i] = Math.min(255, (int)(color[i] * (d + 0.6f * rz)));
+        }
         result[0] = false;
-        float[] sbp = Geometry.mult(Mshadow, upLength(Geometry.mult(tri, a), 4, 1));
-        sbp = div(sbp, sbp[3]);
-        int idx = (int)(sbp[0] + 0.5f) + (int) (sbp[1] + 0.5f) * size;
-        float shadow = 0.3f + 0.7f * (bufferShadow[idx] < sbp[2] + 123.45 ? 1 : 0);
-        float[] vUV = Geometry.mult(uv, a);
-        int rgb = Application.texture.getRGB((int) (vUV[0] * 2844), (int) (vUV[1] * 2844));
-        int[] components = getComponents(rgb);
-        result[1] = toColor((int)(components[0] * shadow), (int)(components[1] * shadow), (int)(components[2] * shadow));
+        result[1] = toColor(color[0], color[1], color[2]);
         return result;
     }
 
-    private int[] getComponents(int color) {
-        int[] components = new int[3];
-        components[2] = color % 256;
-        components[1] = (color / 256) % 256;
-        components[0] = (color /256 / 256) % 256;
-        return components;
+    private float[] getNormal(float[] vuv) {
+        float[] result = new float[3];
+        int rgb = Application.normals.getRGB((int) (vuv[0] * 2844), (int) (vuv[1] * 2844));
+        int[] components = getComponents(rgb);
+        for (int i = 0; i < 3; i++) {
+            result[i] = components[i] / 255.0f * 2.0f - 1.0f;
+        }
+        return result;
+    }
+
+    private int[] getComponents(int rgb) {
+        int value = -16777216 | rgb;
+        return new int[]{ value >> 16 & 255, value >> 8 & 255, value & 255 };
     }
 
     private int toColor(int r, int g, int b) {
-        return 256 * 256 * r + 256 * g + b;
+        return 255 << 24 | (r & 255) << 16 | (g & 255) << 8 | (b & 255);
     }
 }

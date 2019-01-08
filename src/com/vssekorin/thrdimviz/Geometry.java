@@ -21,6 +21,22 @@ public final class Geometry {
         return result;
     }
 
+    public static float[] mult(float[] vector, float number) {
+        float[] result = new float[vector.length];
+        for (int i = 0; i < vector.length; i++) {
+            result[i] = vector[i] * number;
+        }
+        return result;
+    }
+
+    public static float dot(float[] first, float[] second) {
+        float result = 0;
+        for (int i = 0; i < first.length; i++) {
+            result += first[i] * second[i];
+        }
+        return result;
+    }
+
     public static float[] upLength(float[] vector, int newLength, float value) {
         final float[] result = new float[newLength];
         for (int i = 0; i < newLength; i++) {
@@ -30,7 +46,7 @@ public final class Geometry {
     }
 
     public static float[] cross(float[] first, float[] second) {
-        return new float[]{
+        return new float[] {
             first[1] * second[2] - first[2] * second[1],
             first[2] * second[0] - first[0] * second[2],
             first[0] * second[1] - first[1] * second[0]
