@@ -38,7 +38,7 @@ public final class FirstShader implements Shader {
         Object[] result = new Object[2];
         float[] sbc = mult(Mshadow, upLength(mult(tri, a), 4, 1)); //Координаты в bufferShadow
         sbc = div(sbc, sbc[3]);
-        int shadow = bufferShadow[(int)sbc[0] + (int)sbc[1] * size] < sbc[2] + 43.34 ? 1 : 0; //Сравнение z координаты со значением из bufferShadow
+        int shadow = bufferShadow[(int)sbc[0] + (int)sbc[1] * size] < sbc[2] ? 1 : 0; //Сравнение z координаты со значением из bufferShadow
         float[] vUV = mult(uv, a); //интерполяция uv
         float[] n = normalize(lowLength(mult(Mit, upLength(getNormal(vUV), 4, 1)), 3)); //нормаль
         float[] l = normalize(lowLength(mult(M, upLength(ligthDir, 4, 1)), 3)); //свет
