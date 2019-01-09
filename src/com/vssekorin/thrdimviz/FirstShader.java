@@ -1,7 +1,5 @@
 package com.vssekorin.thrdimviz;
 
-import java.util.Arrays;
-
 import static com.vssekorin.thrdimviz.Geometry.*;
 import static com.vssekorin.thrdimviz.Param.*;
 
@@ -24,7 +22,7 @@ public final class FirstShader implements Shader {
         float[] uvs = Application.model.vt.get(Application.model.f.get(a)[b][1] - 1);
         uv[0][b] = uvs[0];
         uv[1][b] = uvs[1];
-        float[] gl = Geometry.mult(
+        float[] gl = mult(
             mult(mxViewport, mxProjection, mxModelView),
             upLength(Application.model.v.get(Application.model.f.get(a)[b][0] - 1), 4, 1)
         );
@@ -38,15 +36,18 @@ public final class FirstShader implements Shader {
     @Override
     public Object[] fragment(float[] a, int b) {
         Object[] result = new Object[2];
-        float[] vUV = mult(uv, a);
-        float[] n = normalize(lowLength(mult(Mit, upLength(getNormal(vUV), 4, 1)), 3));
-        float[] l = normalize(lowLength(mult(M, upLength(ligthDir, 4, 1)), 3));
+        float[] sbc = mult(Mshadow, upLength(mult(tri, a), 4, 1)); //Координаты в bufferShadow
+        sbc = div(sbc, sbc[3]);
+        int shadow = bufferShadow[(int)sbc[0] + (int)sbc[1] * size] < sbc[2] + 43.34 ? 1 : 0; //Сравнение z координаты со значением из bufferShadow
+        float[] vUV = mult(uv, a); //интерполяция uv
+        float[] n = normalize(lowLength(mult(Mit, upLength(getNormal(vUV), 4, 1)), 3)); //нормаль
+        float[] l = normalize(lowLength(mult(M, upLength(ligthDir, 4, 1)), 3)); //свет
         float[] r = normalize(sub(mult(n, dot(n, l) * 2.0f), l));
-        float rz = Math.max(r[2], 0.0f);
-        float d = Math.max(dot(n, l), 0.0f);
-        int[] color = getComponents(Application.texture.getRGB((int) (vUV[0] * 2844), (int) (vUV[1] * 2844)));
+        double rzw = Math.pow(r[2], 10000); //Возведение в некоторую большую степень
+        float diff = dot(n, l); // Чтобы убрать красный цвет с картинки надо делать Math.max с 0, но возможно, он и должен быть.
+        int[] color = getComponents(Application.texture.getRGB((int) (vUV[0] * 2844), (int) (vUV[1] * 2844))); //Компоненты цвета из текстуры
         for (int i = 0; i < 3; i++) {
-            color[i] = Math.min(255, (int)(color[i] * (d + 0.6f * rz)));
+            color[i] = Math.min((int)(color[i] * shadow * (0.5f * diff + 0.5f * rzw)), 255); //От коэффицеинтов ничего не меняется. Формула неправильная с вероятностью 90%.
         }
         result[0] = false;
         result[1] = toColor(color[0], color[1], color[2]);
