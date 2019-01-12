@@ -1,5 +1,6 @@
 package com.vssekorin.thrdimviz;
 
+import static com.vssekorin.thrdimviz.Application.*;
 import static com.vssekorin.thrdimviz.Geometry.*;
 import static com.vssekorin.thrdimviz.Param.*;
 
@@ -9,7 +10,7 @@ public final class SecondShader implements Shader {
 
     @Override
     public float[] vertex(int a, int b) {
-        float[] gl = upLength(Application.model.v.get(Application.model.f.get(a)[b][0] - 1), 4, 1);
+        float[] gl = upLength(model.v.get(model.f.get(a)[b][0] - 1), 4, 1);
         gl = mult(mult(mxViewport, mxProjection, mxModelView), gl);
         float[] glLow = lowLength(div(gl, gl[3]), 3);
         triangle[0][b] = glLow[0];
@@ -19,15 +20,16 @@ public final class SecondShader implements Shader {
     }
 
     @Override
-    public Object[] fragment(float[] a, int b) {
-        final Object[] result = new Object[2];
-        float[] vect = mult(triangle, a);
+    public int fragment(float[] barycentric) {
+        float[] vect = mult(triangle, barycentric);
         float v = vect[2] / depth;
         float intensity = (v > 1.f ? 1.f : (v < 0.f ? 0.f : v));
-        result[0] = false;
         int component = (int)(255 * intensity);
-        result[1] = toColor(component, component, component);
-        return result;
+        return toColor(component, component, component);
+    }
+
+    private int toColor(int component) {
+        return toColor(component, component, component);
     }
 
     private int toColor(int r, int g, int b) {

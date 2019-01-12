@@ -116,25 +116,29 @@ public final class Application {
                 max[j] = Math.max(max[j], coords[i][j] / coords[i][3]);
             }
         }
-        int color = 0;
         for (int x = (int)min[0]; x < max[0]; x++) {
             for (int y = (int)min[1]; y < max[1]; y++) {
-                final float[] c = barycentric(
+                final float[] br = barycentric(
                     lowLength(div(coords[0], coords[0][3]), 2),
                     lowLength(div(coords[1], coords[1][3]), 2),
                     lowLength(div(coords[2], coords[2][3]), 2),
                     new float[]{x, y}
                 );
-                final float z = coords[0][2] * c[0] + coords[1][2] * c[1] + coords[2][2] * c[2];
-                final float w = coords[0][3] * c[0] + coords[1][3] * c[1] + coords[2][3] * c[2];
+                final float z = coords[0][2] * br[0] + coords[1][2] * br[1] + coords[2][2] * br[2];
+                final float w = coords[0][3] * br[0] + coords[1][3] * br[1] + coords[2][3] * br[2];
                 final int fd = (int) (z / w);
-                if (c[0] < 0 || c[1] < 0 || c[2] < 0 || buffer[x + y * size] > fd) {
+                if (br[0] < 0 || br[1] < 0 || br[2] < 0 || buffer[x + y * size] > fd) {
                     continue;
                 }
-                Object[] discardAndColor = shader.fragment(c, color);
-                if (!(boolean) discardAndColor[0] && x < 1000 && y < 1000 && x > 0 && y > 0) {
+//                Object[] discardAndColor = shader.fragment(br);
+//                if (!(boolean) discardAndColor[0] && x < 1000 && y < 1000 && x > 0 && y > 0) {
+//                    buffer[x + y * size] = fd;
+//                    image.setRGB(x, y, (int)discardAndColor[1]);
+//                }
+
+                if (x < 1000 && y < 1000 && x > 0 && y > 0) { //REMOVE!!!
                     buffer[x + y * size] = fd;
-                    image.setRGB(x, y, (int)discardAndColor[1]);
+                    image.setRGB(x, y, shader.fragment(br));
                 }
             }
         }
