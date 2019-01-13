@@ -4,9 +4,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
 
 import static com.vssekorin.thrdimviz.Geometry.*;
 import static com.vssekorin.thrdimviz.Param.*;
@@ -20,7 +17,7 @@ public final class Application {
     public static BufferedImage normals;
 
     public static void main(String[] args) throws IOException {
-        model = loadObj();
+        model = Obj.load();
         texture = ImageIO.read(new File("texture.jpg"));
         normals = ImageIO.read(new File("normals.jpg"));
         for (int i = 0; i < size * size; i++) {
@@ -130,12 +127,6 @@ public final class Application {
                 if (br[0] < 0 || br[1] < 0 || br[2] < 0 || buffer[x + y * size] > fd) {
                     continue;
                 }
-//                Object[] discardAndColor = shader.fragment(br);
-//                if (!(boolean) discardAndColor[0] && x < 1000 && y < 1000 && x > 0 && y > 0) {
-//                    buffer[x + y * size] = fd;
-//                    image.setRGB(x, y, (int)discardAndColor[1]);
-//                }
-
                 if (x < 1000 && y < 1000 && x > 0 && y > 0) { //REMOVE!!!
                     buffer[x + y * size] = fd;
                     image.setRGB(x, y, shader.fragment(br));
@@ -157,41 +148,5 @@ public final class Application {
         } else {
             return new float[]{-1, -1, -1};
         }
-    }
-
-    private static Obj loadObj() {
-        final Obj obj = new Obj();
-        try (Stream<String> objLines = Files.lines(Paths.get("african_head.obj"))) {
-            objLines
-                .map(String::trim)
-                .filter(line -> !line.startsWith("#"))
-                .map(line -> line.split("\\s+"))
-                .forEach(array -> {
-                    switch (array[0]) {
-                        case "f":
-                            String[] v1 = array[1].split("/");
-                            String[] v2 = array[2].split("/");
-                            String[] v3 = array[3].split("/");
-                            obj.f.add(new int[][]{
-                                {Integer.parseInt(v1[0]), Integer.parseInt(v1[1]), Integer.parseInt(v1[2])},
-                                {Integer.parseInt(v2[0]), Integer.parseInt(v2[1]), Integer.parseInt(v2[2])},
-                                {Integer.parseInt(v3[0]), Integer.parseInt(v3[1]), Integer.parseInt(v3[2])},
-                            });
-                            break;
-                        case "v":
-                            obj.v.add(new float[]{Float.parseFloat(array[1]), Float.parseFloat(array[2]), Float.parseFloat(array[3])});
-                            break;
-                        case "vn":
-                            obj.vn.add(new float[]{Float.parseFloat(array[1]), Float.parseFloat(array[2]), Float.parseFloat(array[3])});
-                            break;
-                        case "vt":
-                            obj.vt.add(new float[]{Float.parseFloat(array[1]), Float.parseFloat(array[2]), Float.parseFloat(array[3])});
-                            break;
-                    }
-                });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return obj;
     }
 }

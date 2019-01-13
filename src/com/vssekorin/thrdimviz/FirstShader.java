@@ -39,25 +39,24 @@ public final class FirstShader implements Shader {
         float[] sbc = mult(Mshadow, upLength(mult(triangle, barycentric), 4, 1));
         sbc = div(sbc, sbc[3]);
         int index = (int) sbc[0] + (int) sbc[1] * size;
-        float shadow = 0.2f + 0.8f * (bufferShadow[index] < sbc[2] ? 1 : 0);
+        float shadow = 0.2f + 0.8f * (bufferShadow[index] < sbc[2] + 32.1f ? 1 : 0);
         float[] vuv = mult(uv, barycentric);
         float[] n = normalize(lowLength(mult(Mit, upLength(getNormals(vuv), 4, 1)), 3));
         float[] l = normalize(lowLength(mult(M, upLength(ligthDir, 4, 1)), 3));
         float[] r = normalize(sub(mult(n, dot(n, l) * 2.0f), l));
-        float rzw = (float) Math.pow(Math.max(r[2], 0.0f), 10000);
+        float rzw = (float) Math.pow(Math.max(r[2], 0.0f), 150);
         float diff = Math.max(dot(n, l), 0.0f);
-        int[] components = getComponents(texture.getRGB((int) (vuv[0] * 2844), (int) (vuv[1] * 2844)));
+        int[] components = getComponents(texture.getRGB((int) (vuv[0] * 2844), 2844 - (int) (vuv[1] * 2844)));
         for (int i = 0; i < 3; i++) {
-            components[i] = (int) Math.min(components[i] * shadow * (diff + 0.6 * rzw), 255);
+            components[i] = (int) Math.min(components[i] * shadow * 255 * (0.8 * diff + 0.3 * rzw), 255);
         }
         return toColor(components);
     }
 
     private float[] getNormals(float[] vuv) {
-        int[] components = getComponents(normals.getRGB((int) (vuv[0] * 2844), (int) (vuv[1] * 2844)));
+        int[] components = getComponents(normals.getRGB((int) (vuv[0] * 2844), 2844-(int) (vuv[1] * 2844)));
         float[] normals = new float[3];
         for (int i = 0; i < 3; i++) {
-//            normals[2-i] = components[i] / 255.0f * 2.0f - 1.0f;
             normals[i] = components[i] / 255.0f * 2.0f - 1.0f;
         }
         return normals;
