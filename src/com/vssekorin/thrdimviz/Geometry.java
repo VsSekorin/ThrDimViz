@@ -70,7 +70,7 @@ public final class Geometry {
     }
 
     public static float norma(float[] vector) {
-        return vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2];
+        return (float) Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
     }
 
     public static void identity(float[][] mx) {

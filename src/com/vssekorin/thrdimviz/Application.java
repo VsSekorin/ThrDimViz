@@ -127,10 +127,8 @@ public final class Application {
                 if (br[0] < 0 || br[1] < 0 || br[2] < 0 || buffer[x + y * size] > fd) {
                     continue;
                 }
-                if (x < 1000 && y < 1000 && x > 0 && y > 0) { //REMOVE!!!
-                    buffer[x + y * size] = fd;
-                    image.setRGB(x, y, shader.fragment(br));
-                }
+                buffer[x + y * size] = fd;
+                image.setRGB(x, y, shader.fragment(br));
             }
         }
     }

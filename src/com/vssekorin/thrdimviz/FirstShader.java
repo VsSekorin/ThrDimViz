@@ -48,7 +48,7 @@ public final class FirstShader implements Shader {
         float diff = Math.max(dot(n, l), 0.0f);
         int[] components = getComponents(texture.getRGB((int) (vuv[0] * 2844), 2844 - (int) (vuv[1] * 2844)));
         for (int i = 0; i < 3; i++) {
-            components[i] = (int) Math.min(components[i] * shadow * 255 * (0.8 * diff + 0.3 * rzw), 255);
+            components[i] = (int) Math.min(16 + components[i] * shadow * (1.1 * diff + 0.5 * rzw), 255);
         }
         return toColor(components);
     }

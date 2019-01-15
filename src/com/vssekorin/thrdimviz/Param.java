@@ -6,7 +6,7 @@ public final class Param {
     }
 
     public static final int size = 1000;
-    public static final float[] ligthDir = {1.f, 1.f, 0.f};
+    public static final float[] ligthDir = {1.f, 2.f, 0.f};
     public static final float[] eye = {1.f, 2.f, 3.f};
     public static final float[] center = {0.f, 0.f, 0.f};
     public static final float[] up = {0.f, 1.f, 0.f};
